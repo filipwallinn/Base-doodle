@@ -6,7 +6,8 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope="user-modify-playback-state,user-read-playback-state",
     redirect_uri="http://127.0.0.1:8888/callback",
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-    client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
+    client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+    cache_path=r'C:\Users\walli\repo\bass_doodle\my_doodle\token_cache.txt'
 ))
 
 def play_artists_top_song(artist_ID):
@@ -25,7 +26,9 @@ def spotify_search(user_search):
         print("No artist found.")
         return None
 
-def search_and_play_top_song(artist_search):
-    artist_id = spotify_search(artist_search)
-    if artist_id:
-        play_artists_top_song(artist_id)
+def get_current_album_art_url():
+    playback = sp.current_playback()
+    if playback and playback['item']:
+        return playback['item']['album']['images'][0]['url']
+    return None
+

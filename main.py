@@ -1,6 +1,11 @@
 from imports import *
-from my_doodle.user_interface import *
 from my_doodle.spotipy_logic import *
+from my_doodle.user_interface import *
 
-# play_artists_top_song("36QJpDe2go2KgaRleHCDTp")
-search_and_play_top_song("handle_input")
+def play_song_after_input():
+    artist_name = get_user_input()
+    artist_id = spotify_search(artist_name)
+    if artist_id:
+        play_artists_top_song(artist_id)
+
+build_ui(search_callback=play_song_after_input)
