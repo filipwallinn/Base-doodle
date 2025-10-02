@@ -25,7 +25,7 @@ def spotify_search(user_search):
         print("No artist found.")
         return None
 
-def search_and_play_top_song(artist_search)
+def search_and_play_top_song(artist_search):
     artist_id = spotify_search(artist_search)
     if artist_id:
         play_artists_top_song(artist_id)
