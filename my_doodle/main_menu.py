@@ -28,7 +28,7 @@ with window(label="Main Menu", width=600, height=400):
     add_text("Made with ❤️ in DearPyGui", wrap=0)
 
 # Setup and show viewport
-create_viewport(title='My App', width=600, height=400)
+create_viewport(title='Base Doodle', width=600, height=400)
 setup_dearpygui()
 show_viewport()
 start_dearpygui()
