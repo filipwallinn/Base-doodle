@@ -43,10 +43,6 @@ def show_default_album_art():
     data = [channel for pixel in image.getdata() for channel in pixel]
 
     configure_item("album_art_texture", width=width, height=height, default_value=data)
-
-    if not does_item_exist("album_art_widget"):
-        add_image(texture_tag="album_art_texture", tag="album_art_widget", parent="album_art_container")
-
     print("Default album art loaded.")
 
 # Build UI
@@ -67,10 +63,9 @@ def build_ui(search_callback):
             add_button(label="Exit", callback=exit_app)
 
         with child_window(tag="album_art_container", width=300, height=300):
-            add_text("Album art will appear here", tag="album_art_placeholder")
+            add_image(texture_tag="album_art_texture", tag="album_art_widget")
 
-    # ✅ Show default image BEFORE viewport is shown
-    show_default_album_art()
+    show_default_album_art()  # ✅ Now safe to call
 
     create_viewport(title="Bass Doodle", width=-1, height=-1)
     setup_dearpygui()
@@ -81,11 +76,12 @@ def build_ui(search_callback):
     set_viewport_resize_callback(resize_ui)
 
     show_viewport()
-
     set_frame_callback(get_frame_count() + 1, refresh_loop)
 
     start_dearpygui()
     destroy_context()
+
+
 
 # Update album art from Spotify
 def update_album_art():
@@ -114,7 +110,7 @@ def update_album_art():
         if not does_item_exist("album_art_widget"):
             add_image(texture_tag="album_art_texture", tag="album_art_widget", parent="album_art_container")
 
-        print("Working directory:", os.getcwd())
+#        print("Working directory:", os.getcwd())
     else:
         print("No playback detected. Skipping album art update.")
 
