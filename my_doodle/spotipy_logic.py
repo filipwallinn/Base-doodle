@@ -14,8 +14,15 @@ def play_artists_top_song(artist_ID):
     results = sp.artist_top_tracks(artist_ID)
     top_track = results['tracks'][0]
     track_uri = top_track['uri']
-    print("Now playing:", top_track['name'])
-    sp.start_playback(uris=[track_uri])
+#    print("Now playing:", top_track['name'])
+    devices = sp.devices()
+    if devices['devices']:
+        device_id = devices['devices'][0]['id']
+        sp.transfer_playback(device_id, force_play=True)
+        sp.start_playback(uris=[track_uri])
+    else:
+        print("No active Spotify devices found.")
+
 
 def spotify_search(user_search):
     search_result = sp.search(q=user_search, type='artist')
