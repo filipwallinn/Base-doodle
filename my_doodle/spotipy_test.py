@@ -1,6 +1,6 @@
 import spotipy
 import os
-from spotipy.oauth2 import *
+from spotipy.oauth2 import SpotifyOAuth
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope="user-modify-playback-state,user-read-playback-state",
@@ -9,32 +9,23 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
 ))
 
-artist_id = "36QJpDe2go2KgaRleHCDTp"  # Led Zeppelin
-results = sp.artist_top_tracks(artist_id)
+def play_artists_top_song(artist_ID):
+    results = sp.artist_top_tracks(artist_ID)
+    top_track = results['tracks'][0]
+    track_uri = top_track['uri']
+    print("Now playing:", top_track['name'])
+    sp.start_playback(uris=[track_uri])
 
-top_track = results['tracks'][0]  # Most popular
-track_uri = top_track['uri']
-print("Now playing:", top_track['name'])
+def spotify_search(user_search):
+    search_result = sp.search(q=user_search, type='artist')
+    artist_items = search_result['artists']['items']
+    if artist_items:
+        return artist_items[0]['id']
+    else:
+        print("No artist found.")
+        return None
 
-sp.start_playback(uris=[track_uri])
-
-devices = sp.devices()
-print(devices)
-
-
-
-# lz_uri = 'spotify:artist:36QJpDe2go2KgaRleHCDTp'
-
-# spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-# results = spotify.artist_top_tracks(lz_uri)
-
-# for track in results['tracks'][:10]:
-#     print('track    : ' + track['name'])
-
-#     if track['preview_url']:
-#         print('audio    : ' + track['preview_url'])
-#     else:
-#         print('audio    : [No preview available]')        
-
-#     print('cover art: ' + track['album']['images'][0]['url'])
-#     print()
+def search_and_play_top_song(artist_search)
+    artist_id = spotify_search(artist_search)
+    if artist_id:
+        play_artists_top_song(artist_id)
