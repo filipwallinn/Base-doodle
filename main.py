@@ -8,4 +8,10 @@ def play_song_after_input():
     if artist_id:
         play_artists_top_song(artist_id)
 
+
 build_ui(search_callback=play_song_after_input)
+
+
+
+
+
