@@ -67,3 +67,10 @@ def playback_status():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/search", methods=["POST"])
+def search():
+    data = request.get_json()
+    query = data.get("query")
+    search_type = data.get("type", "track")
+    return jsonify(search_spotify(query, search_type))

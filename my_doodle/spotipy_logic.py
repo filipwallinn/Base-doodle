@@ -129,3 +129,22 @@ def pause_playback():
 
 def resume_playback():
     sp.start_playback()
+
+def search_spotify(query, search_type="track", limit=10):
+    results = sp.search(q=query, type=search_type, limit=limit)
+    items = results.get(search_type + "s", {}).get("items", [])
+    
+    if not items:
+        return []
+
+    if search_type == "track":
+        return [{
+            "name": item["name"],
+            "artist": item["artists"][0]["name"],
+            "album": item["album"]["name"],
+            "uri": item["uri"],
+            "duration_ms": item["duration_ms"]
+        } for item in items]
+
+    # You can expand this for albums, artists, etc.
+    return items

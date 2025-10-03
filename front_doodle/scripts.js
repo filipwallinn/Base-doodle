@@ -92,6 +92,29 @@ function searchBySong() {
   });
 }
 
+function searchSpotify() {
+  const query = document.getElementById("mainSearchInput").value;
+
+  fetch("/search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: query, type: "track" })
+  })
+  .then(res => res.json())
+  .then(results => {
+    const list = document.getElementById("searchResults");
+    list.innerHTML = "";
+
+    results.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name} — ${item.artist} (${item.album})`;
+      list.appendChild(li);
+    });
+  });
+}
+
+
+
 // 🎨 Update album art with fade effect
 function updateAlbumArt() {
   const albumArt = document.getElementById("albumArt");
