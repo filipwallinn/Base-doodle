@@ -4,11 +4,7 @@ from PIL import Image
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 import logging
-
-# Set up logging
-logger = logging.getLogger(__name__)
-
-logger.info(f"Playing song with URI: {uri}")
+import time
 
 # Create resources directory if it doesn't exist
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,8 +39,14 @@ def get_album_art(artist):
     return os.path.join(RESOURCES_PATH, "default.jpg")
 
 def spotify_search(user_search):
-    search_result = sp.search(q=user_search, type='artist', limit=1)
+    search_result = sp.search(q=user_search, type='artist', limit=2)
     artist_items = search_result.get('artists', {}).get('items', [])
+
+    for artist in artist_items:
+        if artist['name'].lower() == user_search.lower():
+            return artist['id']
+
+    # fallback to first result if no exact match
     if artist_items:
         return artist_items[0]['id']
     else:
@@ -124,7 +126,11 @@ def play_song_by_name(song_name):
         "artist": track['artists'][0]['name']
     }
 
+
 def play_song_by_uri(uris):
+    logger = logging.getLogger(__name__)
+    logger.info(f"Playing song with URI: {uris}")
+
     devices = sp.devices()
     if not devices['devices']:
         return {"status": "error", "message": "No active Spotify devices found"}
@@ -133,7 +139,16 @@ def play_song_by_uri(uris):
     sp.transfer_playback(device_id, force_play=True)
     sp.start_playback(device_id=device_id, uris=uris)
 
+    # ✅ Wait briefly to let Spotify update playback state
+    time.sleep(1.5)  # 1.5 seconds is usually enough
+
+    playback = sp.current_playback()
+    if playback and playback['item']:
+        image_url = playback['item']['album']['images'][0]['url']
+        save_album_art(image_url)
+
     return {"status": "playing", "uris": uris}
+
 
 def update_album_art():
     playback = sp.current_playback()

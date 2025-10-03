@@ -6,21 +6,22 @@ import logging
 from logging.handlers import RotatingFileHandler
 import sys
 
-# Redirect stdout and stderr to log files
-sys.stdout = open("logs/stdout.log", "a")
-sys.stderr = open("logs/stderr.log", "a")
-
 # Create logs directory if it doesn't exist
 if not os.path.exists("logs"):
     os.makedirs("logs")
 
-log_handler = RotatingFileHandler("logs/app.log", maxBytes=1000000, backupCount=3)
-log_handler.setLevel(logging.INFO)
-app.logger.addHandler(log_handler)
+# Redirect stdout and stderr to log files
+sys.stdout = open("logs/stdout.log", "a")
+sys.stderr = open("logs/stderr.log", "a")
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="../front_doodle", static_url_path="/")
 CORS(app)
+
+# Set up logging
+log_handler = RotatingFileHandler("logs/app.log", maxBytes=1000000, backupCount=3)
+log_handler.setLevel(logging.INFO)
+app.logger.addHandler(log_handler)
 
 @app.route("/")
 def index():
@@ -45,6 +46,12 @@ def play_song():
     data = request.get_json()
     song_uris = data.get("uris")  # expecting a list
     return jsonify(play_song_by_uri(song_uris))
+
+@app.route("/play-song-by-name", methods=["POST"])
+def play_song_by_name_route():
+    data = request.get_json()
+    song_name = data.get("song")
+    return jsonify(play_song_by_name(song_name))
 
 
 @app.route("/default-image")

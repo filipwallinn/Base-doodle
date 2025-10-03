@@ -74,10 +74,10 @@ function searchByArtist() {
 function searchBySong() {
   const song = document.getElementById("songInput").value;
 
-  fetch("/play-song", {
+  fetch("/play-song-by-name", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ song })
+    body: JSON.stringify({ song: song })
   })
   .then(res => res.json())
   .then(data => {
@@ -160,6 +160,18 @@ function showHint() {
       alert("Hint: " + data.hint);
     });
 }
+
+document.getElementById("sphealSurprise").addEventListener("click", () => {
+  const spheal = document.createElement("img");
+  spheal.src = "/images/spheal.gif";
+  spheal.id = "spheal";
+  document.body.appendChild(spheal);
+
+  // Remove after animation completes
+  setTimeout(() => {
+    spheal.remove();
+  }, 5000);
+});
 
 // 🚀 Sync playback status on page load
 window.addEventListener("DOMContentLoaded", () => {
