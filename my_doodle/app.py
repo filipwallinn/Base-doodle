@@ -2,7 +2,23 @@ from flask import *
 from spotipy_logic import *
 from flask_cors import CORS
 import os
+import logging
+from logging.handlers import RotatingFileHandler
+import sys
 
+# Redirect stdout and stderr to log files
+sys.stdout = open("logs/stdout.log", "a")
+sys.stderr = open("logs/stderr.log", "a")
+
+# Create logs directory if it doesn't exist
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+log_handler = RotatingFileHandler("logs/app.log", maxBytes=1000000, backupCount=3)
+log_handler.setLevel(logging.INFO)
+app.logger.addHandler(log_handler)
+
+# Initialize Flask app
 app = Flask(__name__, static_folder="../front_doodle", static_url_path="/")
 CORS(app)
 
@@ -27,8 +43,8 @@ def play_artist():
 @app.route("/play-song", methods=["POST"])
 def play_song():
     data = request.get_json()
-    song_name = data.get("song")
-    return jsonify(play_song_by_name(song_name))
+    song_uris = data.get("uris")  # expecting a list
+    return jsonify(play_song_by_uri(song_uris))
 
 
 @app.route("/default-image")
@@ -64,13 +80,12 @@ def playback_status():
         return jsonify({"isPlaying": True})
     return jsonify({"isPlaying": False})
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
 @app.route("/search", methods=["POST"])
 def search():
     data = request.get_json()
     query = data.get("query")
     search_type = data.get("type", "track")
     return jsonify(search_spotify(query, search_type))
+
+if __name__ == "__main__":
+    app.run(debug=True)

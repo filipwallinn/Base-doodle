@@ -3,11 +3,19 @@ import requests
 from PIL import Image
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
+import logging
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
+logger.info(f"Playing song with URI: {uri}")
+
+# Create resources directory if it doesn't exist
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCES_PATH = os.path.join(BASE_DIR, "resources")
 os.makedirs(RESOURCES_PATH, exist_ok=True)
 
+# Initialize Spotify client
 sp = Spotify(auth_manager=SpotifyOAuth(
     scope="user-modify-playback-state,user-read-playback-state",
     redirect_uri="http://127.0.0.1:8888/callback",
@@ -116,6 +124,17 @@ def play_song_by_name(song_name):
         "artist": track['artists'][0]['name']
     }
 
+def play_song_by_uri(uris):
+    devices = sp.devices()
+    if not devices['devices']:
+        return {"status": "error", "message": "No active Spotify devices found"}
+
+    device_id = devices['devices'][0]['id']
+    sp.transfer_playback(device_id, force_play=True)
+    sp.start_playback(device_id=device_id, uris=uris)
+
+    return {"status": "playing", "uris": uris}
+
 def update_album_art():
     playback = sp.current_playback()
     if playback and playback['item']:
@@ -130,7 +149,7 @@ def pause_playback():
 def resume_playback():
     sp.start_playback()
 
-def search_spotify(query, search_type="track", limit=10):
+def search_spotify(query, search_type="track", limit=50):
     results = sp.search(q=query, type=search_type, limit=limit)
     items = results.get(search_type + "s", {}).get("items", [])
     
