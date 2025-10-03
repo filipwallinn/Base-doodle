@@ -57,41 +57,61 @@ def play_artists_top_song(artist_id):
 
 def play_song(artist_name):
     artist_id = spotify_search(artist_name)
-    if artist_id:
-        track_name = play_artists_top_song(artist_id)
-        if track_name:
-            return {"status": "playing", "artist": artist_name, "track": track_name}
-        else:
-            return {"status": "error", "message": "Could not play track"}
-    else:
+    if not artist_id:
         return {"status": "error", "message": "Artist not found"}
+
+    top_tracks = sp.artist_top_tracks(artist_id)
+    if not top_tracks['tracks']:
+        return {"status": "error", "message": "No top tracks found"}
+
+    track = top_tracks['tracks'][0]
+    track_uri = track['uri']
+
+    devices = sp.devices()
+    if not devices['devices']:
+        return {"status": "error", "message": "No active Spotify devices found"}
+
+    device_id = devices['devices'][0]['id']
+    sp.transfer_playback(device_id, force_play=True)
+    sp.start_playback(device_id=device_id, uris=[track_uri])
+
+    # ✅ Save album art
+    image_url = track['album']['images'][0]['url']
+    image_path = os.path.join(os.path.dirname(__file__), "resources", "album_art.jpg")
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()
+        with open(image_path, "wb") as f:
+            f.write(response.content)
+    except requests.RequestException as e:
+        print(f"Failed to download album art: {e}")
+
+    return {
+        "status": "playing",
+        "artist": artist_name,
+        "track": track['name']
+    }
+
 
 # Update album art from Spotify
 def update_album_art():
     playback = sp.current_playback()
     if playback and playback['item']:
         url = playback['item']['album']['images'][0]['url']
+        image_path = os.path.join(RESOURCES_PATH, "album_art.jpg")
 
         try:
             response = requests.get(url)
             response.raise_for_status()
+            with open(image_path, "wb") as f:
+                f.write(response.content)
         except requests.RequestException as e:
             print(f"Failed to download album art: {e}")
-            return
-
-        image_path = os.path.join(RESOURCES_PATH, "album_art.jpg")
-        with open(image_path, "wb") as f:
-            f.write(response.content)
-
-        image = Image.open(image_path).convert("RGBA")
-        width, height = image.size
-        data = [channel for pixel in image.getdata() for channel in pixel]
-
-        configure_item("album_art_texture", width=width, height=height, default_value=data)
-
-        if not does_item_exist("album_art_widget"):
-            add_image(texture_tag="album_art_texture", tag="album_art_widget", parent="album_art_container")
-
     else:
         print("No playback detected. Skipping album art update.")
+
+def pause_playback():
+    sp.pause_playback()
+
+
 

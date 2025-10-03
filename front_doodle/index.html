@@ -4,14 +4,21 @@
   <meta charset="UTF-8" />
   <title>Bass Doodle</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-  <h1>Files and Jules Music Quiz</h1>
+  <h1>It's Quiz Time!</h1>
   <input type="text" id="artistInput" placeholder="Enter artist name" />
   <button onclick="searchAndPlay()">Search and Play</button>
+  <button onclick="showHint()">Hint</button>
   <div id="albumArtContainer">
     <img id="albumArt" src="/default-image" alt="Album Art" />
   </div>
   <script src="scripts.js"></script>
+  <div id="bottomControls">
+  <button onclick="pausePlayback()" id="pauseButton">
+    <i class="fas fa-pause"></i>
+  </button>
+</div>
 </body>
 </html>

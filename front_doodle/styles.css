@@ -15,10 +15,35 @@ body {
   height: auto;
   object-fit: cover;
   border-radius: 10%;
-  opacity: 0.75;
-  transition: opacity 0.5s ease-in;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
 #albumArt.loaded {
   opacity: 1;
+}
+
+#bottomControls {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 100;
+}
+
+#pauseButton {
+  background-color: #1db954;
+  border: none;
+  border-radius: 50%;
+  padding: 15px;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+#pauseButton:hover {
+  background-color: #1ed760;
 }
