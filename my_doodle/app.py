@@ -18,11 +18,18 @@ def album_art():
     return send_file(image_path, mimetype="image/jpeg")
 
 
-@app.route("/play", methods=["POST"])
-def play():
-    artist = request.json.get("artist")
-    result = play_song(artist)
-    return jsonify(result)
+@app.route("/play-artist", methods=["POST"])
+def play_artist():
+    data = request.get_json()
+    artist_name = data.get("artist")
+    return jsonify(play_song_by_artist(artist_name))
+
+@app.route("/play-song", methods=["POST"])
+def play_song():
+    data = request.get_json()
+    song_name = data.get("song")
+    return jsonify(play_song_by_name(song_name))
+
 
 @app.route("/default-image")
 def default_image():
@@ -34,6 +41,11 @@ def pause():
     sp.pause_playback()
     return jsonify({"status": "paused"})
 
+@app.route("/resume", methods=["POST"])
+def resume():
+    sp.start_playback()
+    return jsonify({"status": "resumed"})
+
 @app.route("/hint")
 def hint():
     playback = sp.current_playback()
@@ -44,6 +56,14 @@ def hint():
         hint = f"The song is from the album '{album}' released in {release_year}."
         return jsonify({"hint": hint})
     return jsonify({"hint": "No song is currently playing."})
+
+@app.route("/playback-status")
+def playback_status():
+    playback = sp.current_playback()
+    if playback and playback['is_playing']:
+        return jsonify({"isPlaying": True})
+    return jsonify({"isPlaying": False})
+
 
 if __name__ == "__main__":
     app.run(debug=True)

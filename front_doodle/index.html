@@ -8,17 +8,29 @@
 </head>
 <body>
   <h1>It's Quiz Time!</h1>
-  <input type="text" id="artistInput" placeholder="Enter artist name" />
-  <button onclick="searchAndPlay()">Search and Play</button>
+  <input type="text" id="MainSearch" placeholder="MainSearch" />
+<!--  <button onclick=PLACEHOLDER>Play artist</button> -->
   <button onclick="showHint()">Hint</button>
   <div id="albumArtContainer">
     <img id="albumArt" src="/default-image" alt="Album Art" />
   </div>
   <script src="scripts.js"></script>
-  <div id="bottomControls">
-  <button onclick="pausePlayback()" id="pauseButton">
-    <i class="fas fa-pause"></i>
-  </button>
+<div id="rightSideControls">
+  <input type="text" id="artistInput" placeholder="Search by artist">
+  <button onclick="searchByArtist()">Play Artist</button>
+
+  <input type="text" id="songInput" placeholder="Search by song">
+  <button onclick="searchBySong()">Play Song</button>
 </div>
+  <div id="bottomControls">
+    <button onclick="togglePlayback()" id="playPauseButton">
+      <div class="flip-container">
+        <div class="flipper">
+          <div class="front"><i class="fas fa-pause"></i></div>
+          <div class="back"><i class="fas fa-play"></i></div>
+        </div>
+      </div>
+    </button>
+  </div>
 </body>
 </html>

@@ -6,11 +6,53 @@ preloadImage.onload = () => {
   albumArt.classList.add("loaded");
 };
 
-// Triggered when user clicks "Search and Play"
-function searchAndPlay() {
+let isPlaying = true;
+
+// Sync button with Spotify playback status
+function syncPlaybackStatus() {
+  fetch("/playback-status")
+    .then(res => res.json())
+    .then(data => {
+      const button = document.getElementById("playPauseButton");
+      const flipper = button.querySelector(".flipper");
+
+      if (data.isPlaying) {
+        flipper.parentElement.classList.remove("flipped");
+        isPlaying = true;
+      } else {
+        flipper.parentElement.classList.add("flipped");
+        isPlaying = false;
+      }
+    });
+}
+
+// Toggle play/pause and flip icon
+function togglePlayback() {
+  const button = document.getElementById("playPauseButton");
+  const flipper = button.querySelector(".flipper");
+
+  if (isPlaying) {
+    fetch("/pause", { method: "POST" })
+      .then(res => res.json())
+      .then(() => {
+        flipper.parentElement.classList.add("flipped");
+        isPlaying = false;
+      });
+  } else {
+    fetch("/resume", { method: "POST" })
+      .then(res => res.json())
+      .then(() => {
+        flipper.parentElement.classList.remove("flipped");
+        isPlaying = true;
+      });
+  }
+}
+
+// 🔍 Search and play by artist
+function searchByArtist() {
   const artist = document.getElementById("artistInput").value;
 
-  fetch("/play", {
+  fetch("/play-artist", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ artist })
@@ -18,49 +60,64 @@ function searchAndPlay() {
   .then(res => res.json())
   .then(data => {
     if (data.status === "playing") {
-      const albumArt = document.getElementById("albumArt");
-
-      // Fade out current image
-      albumArt.classList.remove("loaded");
-
-      // Wait before fetching new image
-      setTimeout(() => {
-        const timestamp = new Date().getTime();
-        const albumArtUrl = `/album-art?t=${timestamp}`;
-        console.log("Fetching album art:", albumArtUrl);
-
-        fetch(albumArtUrl)
-          .then(res => res.blob())
-          .then(blob => {
-            const imgUrl = URL.createObjectURL(blob);
-
-            // Revoke old blob URL if needed
-            if (albumArt.src.startsWith("blob:")) {
-              URL.revokeObjectURL(albumArt.src);
-            }
-
-            // Force repaint by clearing src first
-            albumArt.src = "";
-            albumArt.src = imgUrl;
-
-            // Fade in new image
-            albumArt.classList.add("loaded");
-          });
-      }, 1000); // 1 second delay
+      updateAlbumArt();
     } else {
-      alert(data.message || "Something went wrong.");
+      alert(data.message || "Artist not found.");
     }
+  })
+  .then(() => {
+    syncPlaybackStatus();
   });
 }
 
-function pausePlayback() {
-  fetch("/pause", { method: "POST" })
-    .then(res => res.json())
-    .then(data => {
-      console.log("Playback paused:", data);
-    });
+// 🎵 Search and play by song
+function searchBySong() {
+  const song = document.getElementById("songInput").value;
+
+  fetch("/play-song", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ song })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "playing") {
+      updateAlbumArt();
+    } else {
+      alert(data.message || "Song not found.");
+    }
+  })
+  .then(() => {
+    syncPlaybackStatus();
+  });
 }
 
+// 🎨 Update album art with fade effect
+function updateAlbumArt() {
+  const albumArt = document.getElementById("albumArt");
+  albumArt.classList.remove("loaded");
+
+  setTimeout(() => {
+    const timestamp = new Date().getTime();
+    const albumArtUrl = `/album-art?t=${timestamp}`;
+
+    fetch(albumArtUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const imgUrl = URL.createObjectURL(blob);
+
+        if (albumArt.src.startsWith("blob:")) {
+          URL.revokeObjectURL(albumArt.src);
+        }
+
+        albumArt.src = "";
+        albumArt.src = imgUrl;
+        albumArt.classList.add("loaded");
+      });
+  }, 1000);
+}
+
+// 💡 Show a hint about the current song
 function showHint() {
   fetch("/hint")
     .then(res => res.json())
@@ -68,3 +125,8 @@ function showHint() {
       alert("Hint: " + data.hint);
     });
 }
+
+// 🚀 Sync playback status on page load
+window.addEventListener("DOMContentLoaded", () => {
+  syncPlaybackStatus();
+});

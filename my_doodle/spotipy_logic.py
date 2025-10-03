@@ -16,15 +16,22 @@ sp = Spotify(auth_manager=SpotifyOAuth(
     cache_path=os.path.join(BASE_DIR, "token_cache.txt")
 ))
 
+def save_album_art(image_url):
+    image_path = os.path.join(RESOURCES_PATH, "album_art.jpg")
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()
+        with open(image_path, "wb") as f:
+            f.write(response.content)
+    except requests.RequestException as e:
+        print(f"Failed to download album art: {e}")
+
 def get_album_art(artist):
     playback = sp.current_playback()
     if playback and playback['item']:
         url = playback['item']['album']['images'][0]['url']
-        image_path = os.path.join(RESOURCES_PATH, "album_art.jpg")
-        response = requests.get(url)
-        with open(image_path, "wb") as f:
-            f.write(response.content)
-        return image_path
+        save_album_art(url)
+        return os.path.join(RESOURCES_PATH, "album_art.jpg")
     return os.path.join(RESOURCES_PATH, "default.jpg")
 
 def spotify_search(user_search):
@@ -55,7 +62,7 @@ def play_artists_top_song(artist_id):
         print("No active Spotify devices found.")
         return None
 
-def play_song(artist_name):
+def play_song_by_artist(artist_name):
     artist_id = spotify_search(artist_name)
     if not artist_id:
         return {"status": "error", "message": "Artist not found"}
@@ -75,16 +82,7 @@ def play_song(artist_name):
     sp.transfer_playback(device_id, force_play=True)
     sp.start_playback(device_id=device_id, uris=[track_uri])
 
-    # ✅ Save album art
-    image_url = track['album']['images'][0]['url']
-    image_path = os.path.join(os.path.dirname(__file__), "resources", "album_art.jpg")
-    try:
-        response = requests.get(image_url)
-        response.raise_for_status()
-        with open(image_path, "wb") as f:
-            f.write(response.content)
-    except requests.RequestException as e:
-        print(f"Failed to download album art: {e}")
+    save_album_art(track['album']['images'][0]['url'])
 
     return {
         "status": "playing",
@@ -92,26 +90,42 @@ def play_song(artist_name):
         "track": track['name']
     }
 
+def play_song_by_name(song_name):
+    search_result = sp.search(q=song_name, type='track', limit=1)
+    tracks = search_result.get('tracks', {}).get('items', [])
 
-# Update album art from Spotify
+    if not tracks:
+        return {"status": "error", "message": "Song not found"}
+
+    track = tracks[0]
+    track_uri = track['uri']
+
+    devices = sp.devices()
+    if not devices['devices']:
+        return {"status": "error", "message": "No active Spotify devices found"}
+
+    device_id = devices['devices'][0]['id']
+    sp.transfer_playback(device_id, force_play=True)
+    sp.start_playback(device_id=device_id, uris=[track_uri])
+
+    save_album_art(track['album']['images'][0]['url'])
+
+    return {
+        "status": "playing",
+        "track": track['name'],
+        "artist": track['artists'][0]['name']
+    }
+
 def update_album_art():
     playback = sp.current_playback()
     if playback and playback['item']:
         url = playback['item']['album']['images'][0]['url']
-        image_path = os.path.join(RESOURCES_PATH, "album_art.jpg")
-
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            with open(image_path, "wb") as f:
-                f.write(response.content)
-        except requests.RequestException as e:
-            print(f"Failed to download album art: {e}")
+        save_album_art(url)
     else:
         print("No playback detected. Skipping album art update.")
 
 def pause_playback():
     sp.pause_playback()
 
-
-
+def resume_playback():
+    sp.start_playback()
