@@ -108,12 +108,24 @@ function searchSpotify() {
     results.forEach(item => {
       const li = document.createElement("li");
       li.textContent = `${item.name} — ${item.artist} (${item.album})`;
+      li.style.cursor = "pointer";
+
+      li.addEventListener("click", () => {
+        fetch("/play-song", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uris: [item.uri] })
+        })
+        .then(() => {
+            updateAlbumArt(); // trigger album art refresh
+            syncPlaybackStatus(); // also update play/pause button
+        });
+      });
+
       list.appendChild(li);
     });
   });
 }
-
-
 
 // 🎨 Update album art with fade effect
 function updateAlbumArt() {
@@ -152,4 +164,5 @@ function showHint() {
 // 🚀 Sync playback status on page load
 window.addEventListener("DOMContentLoaded", () => {
   syncPlaybackStatus();
+  setInterval(syncPlaybackStatus, 5000); // check every 5 seconds
 });
