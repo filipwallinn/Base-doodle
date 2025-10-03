@@ -28,8 +28,23 @@ def get_user_input():
 
 # Resize UI on viewport change
 def resize_ui(sender, app_data):
-    set_item_width("main_window", get_viewport_client_width())
-    set_item_height("main_window", get_viewport_client_height())
+    viewport_width = get_viewport_client_width()
+    viewport_height = get_viewport_client_height()
+
+    set_item_width("main_window", viewport_width)
+    set_item_height("main_window", viewport_height)
+
+    # ✅ Scale album art to 30% of viewport width
+    scaled_width = int(viewport_width * 0.3)
+
+    # Resize image and container
+    configure_item("album_art_widget", width=scaled_width, height=scaled_width)
+    configure_item("album_art_container", width=viewport_width, height=scaled_width + 40)
+
+    # ✅ Center image horizontally and move it up slightly
+    image_x = viewport_width // 2 - scaled_width // 2
+    image_y = 1
+    set_item_pos("album_art_widget", [image_x, image_y])
 
 # Show default image before GUI starts
 def show_default_album_art():
@@ -43,14 +58,24 @@ def show_default_album_art():
     data = [channel for pixel in image.getdata() for channel in pixel]
 
     configure_item("album_art_texture", width=width, height=height, default_value=data)
-    print("Default album art loaded.")
+
+    # ✅ Resize the image widget to match the texture
+    configure_item("album_art_widget", width=width, height=height)
+
+    print(f"Default album art loaded: {width}x{height}")
+
+
+
+
+
 
 # Build UI
 def build_ui(search_callback):
     create_context()
 
+    # Create texture registry and placeholder texture
     with texture_registry(tag="texture_registry"):
-        add_static_texture(1, 1, [255, 255, 255, 255], tag="album_art_texture")
+        add_static_texture(300, 300, [255, 255, 255, 255] * 300 * 300, tag="album_art_texture")
 
     with window(label="Bass Doodle", tag="main_window", no_title_bar=True, no_resize=True, no_move=True):
         with child_window(tag="main_content", autosize_x=True, autosize_y=True, border=False):
@@ -63,23 +88,33 @@ def build_ui(search_callback):
             add_button(label="Exit", callback=exit_app)
 
         with child_window(tag="album_art_container", width=300, height=300):
-            add_image(texture_tag="album_art_texture", tag="album_art_widget")
+            add_spacer(height=200) 
+            add_image("album_art_texture", tag="album_art_widget", width=300, height=300)
 
-    show_default_album_art()  # ✅ Now safe to call
 
-    create_viewport(title="Bass Doodle", width=-1, height=-1)
+
+
+
+    create_viewport(title="Bass Doodle", width=600, height=600)
     setup_dearpygui()
     maximize_viewport()
+    resize_ui(None, None)  # Apply initial scaling
+
+
 
     set_item_width("main_window", get_viewport_client_width())
     set_item_height("main_window", get_viewport_client_height())
     set_viewport_resize_callback(resize_ui)
+
+    # ✅ Update texture BEFORE viewport is shown
+    show_default_album_art()
 
     show_viewport()
     set_frame_callback(get_frame_count() + 1, refresh_loop)
 
     start_dearpygui()
     destroy_context()
+
 
 
 
