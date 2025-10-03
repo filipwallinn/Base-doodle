@@ -1,5 +1,5 @@
 from flask import *
-from spotipy_logic import get_album_art, play_song
+from spotipy_logic import *
 from flask_cors import CORS
 import os
 
@@ -12,9 +12,11 @@ def index():
 
 @app.route("/album-art")
 def album_art():
-    artist = request.args.get("artist")
-    image_path = get_album_art(artist)
+    image_path = os.path.join(os.path.dirname(__file__), "resources", "album_art.jpg")
+    if not os.path.exists(image_path):
+        image_path = os.path.join(os.path.dirname(__file__), "resources", "default.jpg")
     return send_file(image_path, mimetype="image/jpeg")
+
 
 @app.route("/play", methods=["POST"])
 def play():
@@ -26,6 +28,22 @@ def play():
 def default_image():
     image_path = os.path.join(os.path.dirname(__file__), "resources", "default.jpg")
     return send_file(image_path, mimetype="image/jpeg")
+
+@app.route("/pause", methods=["POST"])
+def pause():
+    sp.pause_playback()
+    return jsonify({"status": "paused"})
+
+@app.route("/hint")
+def hint():
+    playback = sp.current_playback()
+    if playback and playback['item']:
+        track = playback['item']
+        album = track['album']['name']
+        release_year = track['album']['release_date'][:4]
+        hint = f"The song is from the album '{album}' released in {release_year}."
+        return jsonify({"hint": hint})
+    return jsonify({"hint": "No song is currently playing."})
 
 if __name__ == "__main__":
     app.run(debug=True)
