@@ -27,6 +27,10 @@ app.logger.addHandler(log_handler)
 def index():
     return app.send_static_file("index.html")
 
+@app.route("/home")
+def home():
+    return app.send_static_file("home_page.html")
+
 @app.route("/album-art")
 def album_art():
     image_path = os.path.join(os.path.dirname(__file__), "resources", "album_art.jpg")

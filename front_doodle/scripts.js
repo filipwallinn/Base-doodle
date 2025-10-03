@@ -177,4 +177,32 @@ document.getElementById("sphealSurprise").addEventListener("click", () => {
 window.addEventListener("DOMContentLoaded", () => {
   syncPlaybackStatus();
   setInterval(syncPlaybackStatus, 5000); // check every 5 seconds
+
+  const selectedMode = localStorage.getItem('selectedMode');
+  if (selectedMode) {
+    switch (selectedMode) {
+      case 'profileShuffle':
+        startProfileShuffle();
+        break;
+      case 'musicTrivia':
+        startMusicTrivia();
+        break;
+      case 'finishTheLyric':
+        startFinishTheLyric();
+        break;
+      case 'albumArtChallenge':
+        startAlbumArtChallenge();
+        break;
+      case 'mysteryArtist':
+        startMysteryArtist();
+        break;
+      case 'classicQuiz':
+        console.log("Classic Quiz mode selected.");
+        // No need to call anything — this is your default behavior
+        break;
+      default:
+        console.warn("Unknown game mode:", selectedMode);
+      localStorage.removeItem('selectedMode');
+    }
+  }
 });
