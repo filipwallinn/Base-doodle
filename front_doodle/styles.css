@@ -22,20 +22,52 @@ body {
   opacity: 1;
 }
 
-
 #rightSideControls {
-  position: fixed;
-  top: 80px; /* adjust based on your header height */
-  right: 0;
-  width: 250px;
-  background-color: #1e1e1e;
-  padding: 20px;
-  border-left: 2px solid #333;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 150px;
+  right: 20%;
+  transform: translateX(50%);
+  width: 300px;
+  background: rgba(24, 24, 24, 0.95);
+  backdrop-filter: blur(6px);
+  padding: 25px;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  border-radius: 16px;
+}
+
+#rightSideControls input[type="text"] {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+#rightSideControls input[type="text"]:focus {
+  background-color: #2a2a2a;
+  box-shadow: 0 0 8px #f0a5ff;
+}
+
+#rightSideControls button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f0a5ff, #f0a5ff);
+  color: #000000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#rightSideControls button:hover {
+  background: linear-gradient(135deg, #0097a7, #00bcd4);
+  transform: scale(1.05);
 }
 
 #searchResults {
@@ -128,4 +160,24 @@ body {
 
 .flipped .flipper {
   transform: rotateY(180deg);
+}
+
+#spheal {
+  position: fixed;
+  bottom: 0;
+  right: -320px; /* start off-screen on the right */
+  width: 300px;
+  z-index: 999;
+  animation: rollSphealLeft 5s linear forwards;
+}
+
+@keyframes rollSphealLeft {
+  0% {
+    right: -300px;
+    transform: rotate(0deg);
+  }
+  100% {
+    right: 100vw;
+    transform: rotate(-1080deg); /* reverse spin for realism */
+  }
 }
