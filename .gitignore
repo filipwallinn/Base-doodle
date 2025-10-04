@@ -209,3 +209,5 @@ __marimo__/
 
 # Secrets file
 spotipy_api.txt
+my_doodle/token_cache.txt
+my_doodle/resources/*
