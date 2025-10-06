@@ -161,6 +161,7 @@ function showHint() {
     });
 }
 
+// 🎉 Spheal surprise animation
 document.getElementById("sphealSurprise").addEventListener("click", () => {
   const spheal = document.createElement("img");
   spheal.src = "/images/spheal.gif";
@@ -197,12 +198,45 @@ window.addEventListener("DOMContentLoaded", () => {
         startMysteryArtist();
         break;
       case 'classicQuiz':
-        console.log("Classic Quiz mode selected.");
-        // No need to call anything — this is your default behavior
+        startClassicQuiz();
         break;
       default:
         console.warn("Unknown game mode:", selectedMode);
       localStorage.removeItem('selectedMode');
     }
+    // Clear the stored mode after starting
+    localStorage.removeItem('selectedMode');
   }
+});
+
+// Game mode selection
+function selectMode(mode) {
+  localStorage.setItem('selectedMode', mode);
+  switch (mode) {
+    case 'classicQuiz':
+      window.location.href = '/classic-quiz';
+      break;
+    case 'musicTrivia':
+      window.location.href = '/music-trivia';
+      break;
+    case 'finishTheLyric':
+      window.location.href = '/finish-the-lyric';
+      break;
+    case 'albumArtChallenge':
+      window.location.href = '/album-art-challenge';
+      break;
+    case 'mysteryArtist':
+      window.location.href = '/mystery-artist';
+      break;
+    case 'profileShuffle':
+      window.location.href = '/profile-shuffle';
+      break;
+    default:
+      console.warn("Unknown game mode:", mode);
+  }
+}
+
+//Main menu navigation
+document.getElementById("quiz").addEventListener("click", () => {
+  window.location.href = "classic-quiz";
 });

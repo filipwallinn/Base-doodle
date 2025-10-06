@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bass Doodle - Home</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>Welcome to Bass Doodle</h1>
+  <h2>Select a Game Mode</h2>
+
+  <div id="gameModeMenu">
+    <button onclick="selectMode('classicQuiz')">Classic Music Quiz</button>
+    <button onclick="selectMode('profileShuffle')">Profile Shuffle</button>
+    <button onclick="selectMode('musicTrivia')">Music Trivia</button>
+    <button onclick="selectMode('finishTheLyric')">Finish the Lyric</button>
+    <button onclick="selectMode('albumArtChallenge')">Album Art Challenge</button>
+    <button onclick="selectMode('mysteryArtist')">Mystery Artist</button>
+  </div>
+  <script>
+    function selectMode(mode) {
+      localStorage.setItem('selectedMode', mode);
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
