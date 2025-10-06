@@ -182,3 +182,15 @@ def search_spotify(query, search_type="track", limit=50):
 
     # You can expand this for albums, artists, etc.
     return items
+
+def get_album_cover_urls(limit=30):
+    """
+    Fetches album cover image URLs from Spotify's new releases.
+    Returns a list of image URLs.
+    """
+    try:
+        results = sp.new_releases(limit=limit)
+        return [album['images'][0]['url'] for album in results['albums']['items']]
+    except Exception as e:
+        print(f"Error fetching album covers: {e}")
+        return []

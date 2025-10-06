@@ -4,21 +4,39 @@
   <meta charset="UTF-8" />
   <title>Bass Doodle - Home</title>
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" />
 </head>
 <body>
-  <h1>Welcome to Bass Doodle</h1>
-  <h2>Select a Game Mode</h2>
+  <div class="background-overlay"></div>
 
-  <div id="gameModeMenu">
-    <button onclick="selectMode('classicQuiz')">Classic Music Quiz</button>
-    <button onclick="selectMode('profileShuffle')">Profile Shuffle</button>
-    <button onclick="selectMode('musicTrivia')">Music Trivia</button>
-    <button onclick="selectMode('finishTheLyric')">Finish the Lyric</button>
-    <button onclick="selectMode('albumArtChallenge')">Album Art Challenge</button>
-    <button onclick="selectMode('mysteryArtist')">Mystery Artist</button>
+  <div class="main-menu-container">
+    <div class="menu-title">
+      <h1>Welcome to Bass Doodle</h1>
+      <h2>Select a Game Mode</h2>
+    </div>
+
+    <div id="gameModeMenu">
+        <button onclick="selectMode('classicQuiz')">Classic Music Quiz</button>
+        <button onclick="selectMode('profileShuffle')">Profile Shuffle</button>
+        <button onclick="selectMode('musicTrivia')">Music Trivia</button>
+        <button onclick="selectMode('finishTheLyric')">Finish the Lyric</button>
+        <button onclick="selectMode('albumArtChallenge')">Album Art Challenge</button>
+        <button onclick="selectMode('mysteryArtist')">Mystery Artist</button>
+    </div>
   </div>
-  <!-- Script to handle game mode selection-->
+<div id="album-scroll-container">
+  <div id="album-scroll-left" class="album-scroll-column">
+    <div class="album-scroll-inner" id="album-scroll-left-inner"></div>
+  </div>
+  <div id="album-scroll-right" class="album-scroll-column">
+    <div class="album-scroll-inner" id="album-scroll-right-inner"></div>
+  </div>
+</div>
+    <!-- Script to handle game mode selection-->
   <script>
     function selectMode(mode) {
       localStorage.setItem('selectedMode', mode);
@@ -46,5 +64,6 @@
       }
     }
   </script>
+  <script src="{{ url_for('static', filename='js/main_menu.js') }}"></script>
 </body>
 </html>

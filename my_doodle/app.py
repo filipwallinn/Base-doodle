@@ -116,5 +116,10 @@ def search():
     search_type = data.get("type", "track")
     return jsonify(search_spotify(query, search_type))
 
+@app.route("/album-covers")
+def album_covers():
+    covers = get_album_cover_urls()
+    return jsonify({"covers": covers})
+
 if __name__ == "__main__":
     app.run(debug=True)
