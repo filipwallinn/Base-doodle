@@ -92,6 +92,7 @@ function searchBySong() {
   });
 }
 
+// 🔍 Search Spotify and list results
 function searchSpotify() {
   const query = document.getElementById("mainSearchInput").value;
 
@@ -164,7 +165,7 @@ function showHint() {
 // 🎉 Spheal surprise animation
 document.getElementById("sphealSurprise").addEventListener("click", () => {
   const spheal = document.createElement("img");
-  spheal.src = "/images/spheal.gif";
+  spheal.src = "/static/images/spheal.gif";
   spheal.id = "spheal";
   document.body.appendChild(spheal);
 
@@ -236,7 +237,12 @@ function selectMode(mode) {
   }
 }
 
+//Placeholder function
+function startClassicQuiz() {
+  console.log("Classic Quiz started.");
+  // Add your quiz logic here later
+}
 //Main menu navigation
-document.getElementById("quiz").addEventListener("click", () => {
-  window.location.href = "classic-quiz";
-});
+//document.getElementById("quiz").addEventListener("click", () => {
+//  window.location.href = "classic-quiz";
+//});

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 from spotipy_logic import *
 from flask_cors import CORS
 import os
@@ -32,17 +32,36 @@ def home():
 def classic_quiz():
     return render_template("quiz.html")
 
-# Static image route
+@app.route("/profile-shuffle")
+def profile_shuffle():
+    return render_template("profile_shuffle.html")
+
+@app.route("/music-trivia")
+def music_trivia():
+    return render_template("music_trivia.html")
+
+@app.route("/finish-the-lyric")
+def finish_the_lyric():
+    return render_template("finish_the_lyric.html")
+
+@app.route("/album-art-challenge")
+def album_art_challenge():
+    return render_template("album_art.html")
+
+@app.route("/mystery-artist")
+def mystery_artist():
+    return render_template("mystery_artist.html")
+
+# Route to serve album art images
 @app.route("/album-art")
-def album_art():
-    image_path = os.path.join(app.static_folder, "resources", "album_art.jpg")
-    if not os.path.exists(image_path):
-        image_path = os.path.join(app.static_folder, "resources", "default.jpg")
+def show_album_art():
+    image_path = os.path.join("resources", "album_art.jpg")
     return send_file(image_path, mimetype="image/jpeg")
 
+# Route to serve default image
 @app.route("/default-image")
 def default_image():
-    image_path = os.path.join(app.static_folder, "resources", "default.jpg")
+    image_path = os.path.join(app.static_folder, "images", "default.jpg")
     return send_file(image_path, mimetype="image/jpeg")
 
 # Spotify-related API routes

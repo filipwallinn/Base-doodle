@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Bass Doodle - Home</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 <body>
   <h1>Welcome to Bass Doodle</h1>
@@ -17,10 +18,32 @@
     <button onclick="selectMode('albumArtChallenge')">Album Art Challenge</button>
     <button onclick="selectMode('mysteryArtist')">Mystery Artist</button>
   </div>
+  <!-- Script to handle game mode selection-->
   <script>
     function selectMode(mode) {
       localStorage.setItem('selectedMode', mode);
-      window.location.href = 'index.html';
+      switch (mode) {
+        case 'classicQuiz':
+          window.location.href = '/classic-quiz';
+          break;
+        case 'profileShuffle':
+          window.location.href = '/profile-shuffle';
+          break;
+        case 'musicTrivia':
+          window.location.href = '/music-trivia';
+          break;
+        case 'finishTheLyric':
+          window.location.href = '/finish-the-lyric';
+          break;
+        case 'albumArtChallenge':
+          window.location.href = '/album-art-challenge';
+          break;
+        case 'mysteryArtist':
+          window.location.href = '/mystery-artist';
+          break;
+        default:
+          console.warn("Unknown game mode:", mode);
+      }
     }
   </script>
 </body>
