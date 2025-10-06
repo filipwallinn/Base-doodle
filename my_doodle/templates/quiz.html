@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Bass Doodle</title>
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -24,6 +24,8 @@
   <button onclick="searchBySong()">Play Song</button>
 <!--Spheal surprise-->  
   <button id="sphealSurprise">Surprise!</button>
+<!--Return to Main Menu-->
+  <button onclick="goToMainMenu()">Back to Main Menu</button>
 </div>
   <div id="bottomControls">
     <button onclick="togglePlayback()" id="playPauseButton">
@@ -35,6 +37,6 @@
       </div>
     </button>
   </div>
-  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>
