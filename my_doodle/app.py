@@ -116,10 +116,19 @@ def search():
     search_type = data.get("type", "track")
     return jsonify(search_spotify(query, search_type))
 
+# New route to fetch album cover URLs
 @app.route("/album-covers")
 def album_covers():
     covers = get_album_cover_urls()
-    return jsonify({"covers": covers})
+    app.logger.info(f"Album covers fetched: left={len(covers['left'])}, right={len(covers['right'])}")
+    return jsonify(covers)
 
+
+# Health check route
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+# Run the app
 if __name__ == "__main__":
     app.run(debug=True)

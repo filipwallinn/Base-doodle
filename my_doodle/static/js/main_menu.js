@@ -71,49 +71,26 @@ document.addEventListener("DOMContentLoaded", () => {
   fetch("/album-covers")
     .then(response => response.json())
     .then(data => {
-      const covers = data.covers;
-      const allCovers = [...covers, ...covers]; // Duplicate for looping
+      const leftCovers = [...data.left, ...data.left]; // Duplicate for looping
+      const rightCovers = [...data.right, ...data.right];
 
       const leftInner = document.getElementById("album-scroll-left-inner");
       const rightInner = document.getElementById("album-scroll-right-inner");
 
       if (!leftInner || !rightInner) return;
 
-      allCovers.forEach((url, index) => {
-        const imgLeft = document.createElement("img");
-        imgLeft.src = url;
-        imgLeft.alt = "Album cover";
-
-        const imgRight = document.createElement("img");
-        imgRight.src = url;
-        imgRight.alt = "Album cover";
-
-        if (index % 2 === 0) {
-          leftInner.appendChild(imgLeft.cloneNode());
-          rightInner.appendChild(imgRight.cloneNode());
-        } else {
-          leftInner.appendChild(imgRight.cloneNode());
-          rightInner.appendChild(imgLeft.cloneNode());
-        }
+      leftCovers.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Album cover";
+        leftInner.appendChild(img);
       });
 
-      // Duplicate again for seamless loop
-      allCovers.forEach((url, index) => {
-        const imgLeft = document.createElement("img");
-        imgLeft.src = url;
-        imgLeft.alt = "Album cover";
-
-        const imgRight = document.createElement("img");
-        imgRight.src = url;
-        imgRight.alt = "Album cover";
-
-        if (index % 2 === 0) {
-          leftInner.appendChild(imgLeft.cloneNode());
-          rightInner.appendChild(imgRight.cloneNode());
-        } else {
-          leftInner.appendChild(imgRight.cloneNode());
-          rightInner.appendChild(imgLeft.cloneNode());
-        }
+      rightCovers.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Album cover";
+        rightInner.appendChild(img);
       });
     })
     .catch(error => console.error("Error loading album covers:", error));

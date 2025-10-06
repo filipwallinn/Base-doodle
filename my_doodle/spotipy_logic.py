@@ -3,6 +3,7 @@ import requests
 from PIL import Image
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials
 import logging
 import time
 
@@ -18,6 +19,12 @@ sp = Spotify(auth_manager=SpotifyOAuth(
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
     client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
     cache_path=os.path.join(BASE_DIR, "token_cache.txt")
+))
+
+# Public Spotify client for fetching new releases
+public_sp = Spotify(auth_manager=SpotifyClientCredentials(
+    client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+    client_secret=os.getenv("SPOTIPY_CLIENT_SECRET")
 ))
 
 def save_album_art(image_url):
@@ -183,14 +190,87 @@ def search_spotify(query, search_type="track", limit=50):
     # You can expand this for albums, artists, etc.
     return items
 
-def get_album_cover_urls(limit=30):
+_cached_playlist_ids = {}
+
+def find_playlist_id(query="classic rock"):
     """
-    Fetches album cover image URLs from Spotify's new releases.
-    Returns a list of image URLs.
+    Searches Spotify for a playlist matching the query and returns its ID.
     """
     try:
-        results = sp.new_releases(limit=limit)
-        return [album['images'][0]['url'] for album in results['albums']['items']]
+        results = public_sp.search(q=query, type="playlist", limit=1)
+        print("Raw playlist search result:", results)  # 👈 Debug print
+
+        playlists = results.get('playlists')
+        if not playlists:
+            print(f"No 'playlists' key found in search results for query: {query}")
+            return None
+
+        items = playlists.get('items')
+        if not items:
+            print(f"No playlist items found for query: {query}")
+            return None
+
+        playlist = items[0]
+        print(f"✅ Found playlist: {playlist['name']} (ID: {playlist['id']})")
+        return playlist['id']
+    except Exception as e:
+        print(f"Error finding playlist: {e}")
+        return None
+
+    
+# def get_album_cover_urls(limit=25):
+#     try:
+#         # Left: new releases
+#         new_releases = public_sp.new_releases(limit=limit)
+#         left_covers = [album['images'][0]['url'] for album in new_releases['albums']['items'] if album['images']]
+
+#         # Right: classic playlist
+#         classic_playlist_id = find_playlist_id("classic rock")
+#         right_covers = get_classic_album_covers(classic_playlist_id, limit=limit) if classic_playlist_id else []
+
+#         return {
+#             "left": left_covers,
+#             "right": right_covers
+#         }
+#     except Exception as e:
+#         print(f"Error fetching album covers: {e}")
+#         return {"left": [], "right": []}
+
+def get_album_cover_urls(limit=25):
+    try:
+        # Left: new releases
+        new_releases = public_sp.new_releases(limit=limit)
+        left_covers = [album['images'][0]['url'] for album in new_releases['albums']['items'] if album['images']]
+
+        # Right: hardcoded classic playlist
+        classic_playlist_id = "6e93dfkUqpQ5AMw7L6FNkt"  # All Out 80s
+        right_covers = get_classic_album_covers(classic_playlist_id, limit=limit)
+
+        print(f"Left covers: {len(left_covers)}, Right covers: {len(right_covers)}")
+        return {
+            "left": left_covers,
+            "right": right_covers
+        }
     except Exception as e:
         print(f"Error fetching album covers: {e}")
+        return {"left": [], "right": []}
+
+def get_classic_album_covers(playlist_id, limit=25):
+    try:
+        playlist_data = public_sp.playlist_items(
+            playlist_id,
+            limit=limit,
+            fields="items(track(album(images)))"
+        )
+        covers = []
+
+        for item in playlist_data['items']:
+            track = item.get('track')
+            if track and track['album']['images']:
+                covers.append(track['album']['images'][0]['url'])
+
+        print(f"Fetched {len(covers)} classic album covers.")
+        return covers
+    except Exception as e:
+        print(f"Error fetching classic album covers: {e}")
         return []
