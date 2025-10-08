@@ -67,31 +67,55 @@ function startClassicQuiz() {
   // Add your quiz logic here later
 }
 
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   fetch("/album-covers")
     .then(response => response.json())
     .then(data => {
-      const leftCovers = [...data.left, ...data.left]; // Duplicate for looping
-      const rightCovers = [...data.right, ...data.right];
+      const leftCovers = [...data.left];
+      const rightCovers = [...data.right];
+
+      shuffleArray(leftCovers);
+      shuffleArray(rightCovers);
 
       const leftInner = document.getElementById("album-scroll-left-inner");
       const rightInner = document.getElementById("album-scroll-right-inner");
 
       if (!leftInner || !rightInner) return;
 
-      leftCovers.forEach(url => {
+      [...leftCovers, ...leftCovers].forEach((url, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("album-img-wrapper");
+        wrapper.style.setProperty("--i", index);
+
         const img = document.createElement("img");
         img.src = url;
         img.alt = "Album cover";
-        leftInner.appendChild(img);
+
+        wrapper.appendChild(img);
+        leftInner.appendChild(wrapper);
       });
 
-      rightCovers.forEach(url => {
+      [...rightCovers, ...rightCovers].forEach((url, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("album-img-wrapper");
+        wrapper.style.setProperty("--i", index);
+
         const img = document.createElement("img");
         img.src = url;
         img.alt = "Album cover";
-        rightInner.appendChild(img);
+
+        wrapper.appendChild(img);
+        rightInner.appendChild(wrapper);
       });
+
     })
     .catch(error => console.error("Error loading album covers:", error));
 });

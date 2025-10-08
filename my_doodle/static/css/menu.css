@@ -100,6 +100,20 @@ h2 {
   left: 0;
 }
 
+.album-scroll-inner {
+  display: flex;
+  flex-direction: column;
+  animation: scroll-vertical 1200s linear infinite;
+}
+
+/*#album-scroll-left .album-scroll-inner {
+  animation: scroll-vertical 300s linear infinite;
+}*/
+
+#album-scroll-right .album-scroll-inner {
+  margin-top: -225px; /* Adjust based on image height */
+}
+
 .album-scroll-column {
   position: fixed;
   top: 0;
@@ -110,22 +124,49 @@ h2 {
   opacity: 0.65; /* Slightly faded */
 }
 
-.album-scroll-inner {
-  display: flex;
-  flex-direction: column;
-  animation: scroll-vertical 1200s linear infinite;
-}
-
-.album-scroll-column img {
-  width: 100%;
-  transition: transform 15s;
-}
-
 .album-scroll-column img:hover {
   transform: scale(1);
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+}
+
+.album-img-wrapper {
+  animation: zoomScroll 6s ease-in-out infinite, drift 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+.album-img-wrapper img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  opacity: 0;
+  animation: fadeIn 1.5s ease forwards;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+  transition: filter 1s ease;
+}
+
+.album-img-wrapper img:hover {
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
 }
 
 @keyframes scroll-vertical {
   0% { transform: translateY(-50%); }
-  100% { transform: translateY(0); } /* put -50% here instead to scroll upward */
+  100% { transform: translateY(0); } /* put -50% here instead to scroll upward */  
+}
+
+@keyframes zoomScroll {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 0.65;
+  }
+}
+
+@keyframes drift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
 }
