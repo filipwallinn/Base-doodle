@@ -130,7 +130,7 @@ h2 {
 }
 
 .album-img-wrapper {
-  animation: zoomScroll 6s ease-in-out infinite, drift 12s ease-in-out infinite;
+  animation: zoomScroll 6s ease-in-out infinite;
   will-change: transform;
 }
 
@@ -163,10 +163,4 @@ h2 {
   to {
     opacity: 0.65;
   }
-}
-
-@keyframes drift {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(5px); }
-  100% { transform: translateX(0); }
 }
