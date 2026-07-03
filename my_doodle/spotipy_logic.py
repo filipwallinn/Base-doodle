@@ -1,9 +1,11 @@
 import os
+import random
 import requests
 from PIL import Image
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.exceptions import SpotifyException
 from dotenv import load_dotenv
 import logging
 import time
@@ -97,6 +99,11 @@ def _play_uris_on_device(uris):
     immediately after it is a known race condition: the device may still be
     mid-transfer and silently ignore the new URIs, leaving the previous
     track playing. A short delay avoids that.
+
+    Spotify's start_playback can also return success (204) while silently
+    not actually changing the track (observed in practice, not just theory).
+    So after sending the command we poll current_playback until it actually
+    reflects the requested track, rather than trusting the 204 alone.
     """
     device_id = _get_target_device_id()
     if not device_id:
@@ -105,7 +112,17 @@ def _play_uris_on_device(uris):
     sp.transfer_playback(device_id, force_play=True)
     time.sleep(0.8)
     sp.start_playback(device_id=device_id, uris=uris)
-    return {"status": "playing"}
+
+    for _ in range(5):
+        time.sleep(0.6)
+        playback = sp.current_playback()
+        if playback and playback.get("item") and playback["item"]["uri"] in uris:
+            return {"status": "playing", "confirmed_track": playback["item"]}
+
+    return {
+        "status": "error",
+        "message": "Spotify accepted the command but didn't start playing. Try again."
+    }
 
 def play_song_by_artist(artist_name):
     artist_id = spotify_search(artist_name)
@@ -122,12 +139,14 @@ def play_song_by_artist(artist_name):
     if result["status"] != "playing":
         return result
 
-    save_album_art(track['album']['images'][0]['url'])
+    confirmed = result["confirmed_track"]
+    if confirmed["album"]["images"]:
+        save_album_art(confirmed["album"]["images"][0]["url"])
 
     return {
         "status": "playing",
-        "artist": artist_name,
-        "track": track['name']
+        "artist": confirmed["artists"][0]["name"],
+        "track": confirmed["name"]
     }
 
 def play_song_by_name(song_name):
@@ -146,12 +165,14 @@ def play_song_by_name(song_name):
     if result["status"] != "playing":
         return result
 
-    save_album_art(track['album']['images'][0]['url'])
+    confirmed = result["confirmed_track"]
+    if confirmed["album"]["images"]:
+        save_album_art(confirmed["album"]["images"][0]["url"])
 
     return {
         "status": "playing",
-        "track": track['name'],
-        "artist": track['artists'][0]['name']
+        "track": confirmed["name"],
+        "artist": confirmed["artists"][0]["name"]
     }
 
 
@@ -163,13 +184,9 @@ def play_song_by_uri(uris):
     if result["status"] != "playing":
         return result
 
-    # Wait briefly to let Spotify update playback state
-    time.sleep(1.5)  # 1.5 seconds is usually enough
-
-    playback = sp.current_playback()
-    if playback and playback['item']:
-        image_url = playback['item']['album']['images'][0]['url']
-        save_album_art(image_url)
+    confirmed = result["confirmed_track"]
+    if confirmed["album"]["images"]:
+        save_album_art(confirmed["album"]["images"][0]["url"])
 
     return {"status": "playing", "uris": uris}
 
@@ -206,6 +223,99 @@ def search_spotify(query, search_type="track", limit=50):
 
     # You can expand this for albums, artists, etc.
     return items
+
+def _pick_tracks(candidates, exclude_track_id, primary_artist_id, limit, max_same_artist=2):
+    filtered = []
+    same_artist_count = 0
+    for track in candidates:
+        if track["id"] == exclude_track_id:
+            continue
+        if track["artists"][0]["id"] == primary_artist_id:
+            if same_artist_count >= max_same_artist:
+                continue
+            same_artist_count += 1
+        filtered.append(track)
+
+    random.shuffle(filtered)
+    return filtered[:limit]
+
+def _format_tracks(tracks):
+    return [{
+        "name": t["name"],
+        "artist": t["artists"][0]["name"],
+        "uri": t["uri"],
+        "image": t["album"]["images"][-1]["url"] if t["album"]["images"] else None
+    } for t in tracks]
+
+def get_similar_tracks(limit=8):
+    """Suggests tracks similar to what's currently playing.
+
+    Spotify deprecated /recommendations and /related-artists for apps
+    without extended API access, so this approximates similarity by finding
+    a real playlist that features the current artist and pulling other
+    tracks from it. Playlists mixing many different artists (e.g. a decade
+    or genre mix) give much better discovery than single-artist "Greatest
+    Hits" compilations, so among playlists that include the artist, the one
+    with the most distinct artists is preferred.
+    """
+    playback = sp.current_playback()
+    if not playback or not playback.get("item"):
+        return []
+
+    current_track = playback["item"]
+    primary_artist = current_track["artists"][0]
+
+    results = sp.search(q=primary_artist["name"], type="playlist", limit=8)
+    playlists = [p for p in results.get("playlists", {}).get("items", []) if p]
+
+    best_tracks = None
+    best_diversity = 0
+
+    for playlist in playlists[:6]:
+        try:
+            items = sp.playlist_items(
+                playlist["id"],
+                limit=50,
+                fields="items(track(id,name,uri,artists(id,name),album(images)))"
+            )["items"]
+        except SpotifyException:
+            continue
+
+        tracks = [it["track"] for it in items if it.get("track")]
+        artist_ids = {t["artists"][0]["id"] for t in tracks if t["artists"]}
+        contains_current_artist = primary_artist["id"] in artist_ids
+
+        if not contains_current_artist:
+            continue
+
+        diversity = len(artist_ids)
+        if diversity > best_diversity:
+            best_diversity = diversity
+            best_tracks = tracks
+
+    if best_tracks:
+        picks = _pick_tracks(best_tracks, current_track["id"], primary_artist["id"], limit)
+        if picks:
+            return _format_tracks(picks)
+
+    # Fall back to genre search if no playlist featuring this artist was found
+    genres = []
+    try:
+        genres = sp.artist(primary_artist["id"]).get("genres", [])
+    except SpotifyException:
+        pass
+
+    candidates = []
+    if genres:
+        genre_results = sp.search(q=f'genre:"{genres[0]}"', type="track", limit=40)
+        candidates = genre_results.get("tracks", {}).get("items", [])
+
+    if not candidates:
+        name_results = sp.search(q=primary_artist["name"], type="track", limit=40)
+        candidates = name_results.get("tracks", {}).get("items", [])
+
+    picks = _pick_tracks(candidates, current_track["id"], primary_artist["id"], limit)
+    return _format_tracks(picks)
 
 _cached_playlist_ids = {}
 

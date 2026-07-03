@@ -1,9 +1,9 @@
 body.home-body {
   margin: 0;
   padding: 0;
-  background-image: url('/static/images/background.jpg');
-  background-size: contain; /* changed from cover */
-  background-position: top center; /* changed from center */
+  background-image: url('/static/images/background.svg');
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
 

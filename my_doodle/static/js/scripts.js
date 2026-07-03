@@ -89,6 +89,35 @@ function togglePlayback() {
   }
 }
 
+// Spotify's playback state takes a moment to catch up after a play command,
+// so wait before re-reading it instead of racing an immediately-stale read.
+function refreshAfterPlay() {
+  updateAlbumArt();
+  setTimeout(() => {
+    syncPlaybackStatus();
+    loadSimilarTracks();
+  }, 1200);
+}
+
+// Play one or more track URIs and refresh the UI to match
+function playUris(uris) {
+  setAlbumArtLoading(true);
+  return fetch("/play-song", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uris })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status !== "playing") {
+      setAlbumArtLoading(false);
+      showToast(data.message || "Couldn't play that track.", "error");
+      return;
+    }
+    refreshAfterPlay();
+  });
+}
+
 // Search and play an artist's top song
 function searchByArtist() {
   const artist = document.getElementById("artistInput").value.trim();
@@ -103,14 +132,11 @@ function searchByArtist() {
   .then(res => res.json())
   .then(data => {
     if (data.status === "playing") {
-      updateAlbumArt();
+      refreshAfterPlay();
     } else {
       setAlbumArtLoading(false);
       showToast(data.message || "Artist not found.", "error");
     }
-  })
-  .then(() => {
-    syncPlaybackStatus();
   });
 }
 
@@ -128,14 +154,11 @@ function searchBySong() {
   .then(res => res.json())
   .then(data => {
     if (data.status === "playing") {
-      updateAlbumArt();
+      refreshAfterPlay();
     } else {
       setAlbumArtLoading(false);
       showToast(data.message || "Song not found.", "error");
     }
-  })
-  .then(() => {
-    syncPlaybackStatus();
   });
 }
 
@@ -166,24 +189,7 @@ function searchSpotify() {
       li.textContent = `${item.name} — ${item.artist} (${item.album})`;
       li.style.cursor = "pointer";
 
-      li.addEventListener("click", () => {
-        setAlbumArtLoading(true);
-        fetch("/play-song", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ uris: [item.uri] })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status !== "playing") {
-            setAlbumArtLoading(false);
-            showToast(data.message || "Couldn't play that track.", "error");
-            return;
-          }
-          updateAlbumArt();
-          syncPlaybackStatus();
-        });
-      });
+      li.addEventListener("click", () => playUris([item.uri]));
 
       list.appendChild(li);
     });
@@ -214,6 +220,54 @@ function updateAlbumArt() {
         setAlbumArtLoading(false);
       });
   }, 1000);
+}
+
+// Load and render tracks similar to what's currently playing
+function loadSimilarTracks() {
+  const panel = document.getElementById("similarPanel");
+  const list = document.getElementById("similarList");
+  if (!panel || !list) return;
+
+  fetch("/similar-tracks")
+    .then(res => res.json())
+    .then(tracks => {
+      list.innerHTML = "";
+
+      if (!tracks.length) {
+        panel.classList.remove("similar-panel-visible");
+        return;
+      }
+
+      tracks.forEach(track => {
+        const card = document.createElement("button");
+        card.className = "similar-card";
+
+        const img = document.createElement("img");
+        img.src = track.image || "/default-image";
+        img.alt = track.name;
+
+        const info = document.createElement("div");
+        info.className = "similar-card-info";
+
+        const nameEl = document.createElement("span");
+        nameEl.className = "similar-card-name";
+        nameEl.textContent = track.name;
+
+        const artistEl = document.createElement("span");
+        artistEl.className = "similar-card-artist";
+        artistEl.textContent = track.artist;
+
+        info.appendChild(nameEl);
+        info.appendChild(artistEl);
+        card.appendChild(img);
+        card.appendChild(info);
+        card.addEventListener("click", () => playUris([track.uri]));
+
+        list.appendChild(card);
+      });
+
+      panel.classList.add("similar-panel-visible");
+    });
 }
 
 // Show a hint about the current song
@@ -259,6 +313,7 @@ function bindEnterKey(inputId, action) {
 window.addEventListener("DOMContentLoaded", () => {
   syncPlaybackStatus();
   setInterval(syncPlaybackStatus, 5000);
+  loadSimilarTracks();
 
   bindEnterKey("mainSearchInput", searchSpotify);
   bindEnterKey("artistInput", searchByArtist);

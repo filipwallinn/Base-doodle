@@ -1,17 +1,19 @@
 body.quiz-body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
   font-family: var(--font-body);
   color: var(--color-text);
-  background-image: url('/static/images/background.jpg');
+  background-image: url('/static/images/background.svg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   text-align: center;
-  overflow-x: hidden;
-  padding-bottom: 140px;
+  overflow: hidden;
+  padding-bottom: 84px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .quiz-header {
@@ -20,13 +22,14 @@ body.quiz-body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 40px;
+  padding: 12px 40px;
   gap: 20px;
+  flex: 0 0 auto;
 }
 
 .quiz-header h1 {
   font-family: var(--font-heading);
-  font-size: 2.6rem;
+  font-size: 1.9rem;
   color: var(--color-accent);
   margin: 0;
   flex: 1;
@@ -44,18 +47,22 @@ body.quiz-body {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 300px minmax(320px, 640px) 300px;
+  grid-template-columns: 280px minmax(280px, 560px) 280px;
   justify-content: center;
-  gap: 28px;
-  padding: 10px 40px 40px;
+  align-items: start;
+  gap: 20px;
+  padding: 4px 40px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Search panel */
 .search-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-height: 70vh;
+  gap: 12px;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .search-bar {
@@ -101,14 +108,14 @@ body.quiz-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  max-height: 100%;
 }
 
 #albumArtContainer {
   position: relative;
-  width: 100%;
+  width: clamp(160px, 30vh, 300px);
   aspect-ratio: 1 / 1;
-  max-width: 480px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
@@ -159,38 +166,39 @@ body.quiz-body {
 
 #nowPlayingTrack {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-text);
 }
 
 #nowPlayingArtist {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
 }
 
 #hintText {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
   max-width: 420px;
-  min-height: 1.2em;
+  min-height: 1em;
 }
 
 .hint-btn {
-  padding: 12px 26px;
+  padding: 8px 20px;
 }
 
 /* Controls panel */
 .controls-panel {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 14px;
+  max-height: 100%;
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   text-align: left;
 }
 
@@ -232,7 +240,7 @@ input[type="text"]:focus {
 /* Playback control */
 #bottomControls {
   position: fixed;
-  bottom: 24px;
+  bottom: 12px;
   left: 0;
   width: 100%;
   text-align: center;
@@ -243,10 +251,10 @@ input[type="text"]:focus {
   background: linear-gradient(145deg, #4b3e5e, #2a2233);
   border: none;
   border-radius: 50%;
-  width: 90px;
-  height: 90px;
+  width: 60px;
+  height: 60px;
   padding: 0;
-  font-size: 32px;
+  font-size: 22px;
   color: var(--color-text);
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
@@ -256,6 +264,96 @@ input[type="text"]:focus {
 
 #playPauseButton:hover {
   transform: scale(1.06);
+}
+
+/* Similar tracks */
+.similar-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 8px auto 0;
+  padding: 10px 20px;
+  flex: 0 0 auto;
+  display: none;
+}
+
+.similar-panel.similar-panel-visible {
+  display: block;
+}
+
+.similar-panel h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.similar-panel h3 i {
+  font-size: 0.85rem;
+}
+
+.similar-list {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.similar-card {
+  flex: 0 0 100px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.similar-card:hover {
+  background: rgba(var(--color-accent-rgb), 0.16);
+  transform: translateY(-3px);
+}
+
+.similar-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.similar-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.similar-card-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.similar-card-artist {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .flip-container {
@@ -341,9 +439,19 @@ input[type="text"]:focus {
 }
 
 @media (max-width: 1100px) {
+  /* A single stacked column needs more vertical room than any fixed
+     viewport can give it, so let this breakpoint scroll naturally
+     instead of forcing everything into one screen. */
+  body.quiz-body {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
   .quiz-layout {
     grid-template-columns: 1fr;
     padding: 10px 20px 40px;
+    flex: none;
   }
 
   .quiz-header {
@@ -354,5 +462,9 @@ input[type="text"]:focus {
 
   .nav-spacer {
     display: none;
+  }
+
+  #albumArtContainer {
+    width: clamp(160px, 60vw, 300px);
   }
 }

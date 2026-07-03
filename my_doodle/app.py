@@ -85,8 +85,8 @@ def show_album_art():
 # Route to serve default image
 @app.route("/default-image")
 def default_image():
-    image_path = os.path.join(app.static_folder, "images", "default.jpg")
-    return send_file(image_path, mimetype="image/jpeg")
+    image_path = os.path.join(app.static_folder, "images", "default-album-art.svg")
+    return send_file(image_path, mimetype="image/svg+xml")
 
 # Spotify-related API routes
 @app.route("/play-artist", methods=["POST"])
@@ -146,6 +146,10 @@ def search():
     query = data.get("query")
     search_type = data.get("type", "track")
     return jsonify(search_spotify(query, search_type))
+
+@app.route("/similar-tracks")
+def similar_tracks():
+    return jsonify(get_similar_tracks())
 
 # New route to fetch album cover URLs
 @app.route("/album-covers")
