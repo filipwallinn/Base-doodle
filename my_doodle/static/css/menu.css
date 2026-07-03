@@ -1,4 +1,4 @@
-body {
+body.home-body {
   margin: 0;
   padding: 0;
   background-image: url('/static/images/background.jpg');
@@ -13,20 +13,23 @@ body {
 }
 
 h1 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   text-align: center;
   margin-top: 40px;
   font-size: 72px;
-  color: #d6c9f0;
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.01em;
 }
 
 h2 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 48px;  
-  color: #d6c9f0;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
-
-
 
 .background-overlay {
   position: fixed;
@@ -52,37 +55,46 @@ h2 {
 }
 
 #gameModeMenu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+  padding: 8px;
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
 }
 
 #gameModeMenu button {
-  padding: 14px 28px;
-  margin: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 26px;
   border: none;
-  border-radius: 12px;
-  background: rgba(216, 204, 226, 0.8); /* muted lavender with slight transparency */
-  color: #1a1a1a;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-rgb), 0.12);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: background var(--transition-med), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-lift);
+  border: 1px solid var(--color-panel-border);
+}
+
+#gameModeMenu button i {
+  color: var(--color-accent);
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
 }
 
 #gameModeMenu button:hover {
-  background: rgba(216, 204, 226, 1); /* fully opaque on hover */
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(var(--color-accent-rgb), 0.24);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft);
 }
 
 #album-scroll-container {

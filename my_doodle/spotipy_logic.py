@@ -4,6 +4,7 @@ from PIL import Image
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.oauth2 import SpotifyClientCredentials
+from dotenv import load_dotenv
 import logging
 import time
 
@@ -12,10 +13,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCES_PATH = os.path.join(BASE_DIR, "resources")
 os.makedirs(RESOURCES_PATH, exist_ok=True)
 
+load_dotenv(os.path.join(os.path.dirname(BASE_DIR), ".env"))
+
 # Initialize Spotify client
 sp = Spotify(auth_manager=SpotifyOAuth(
     scope="user-modify-playback-state,user-read-playback-state",
-    redirect_uri="http://127.0.0.1:8888/callback",
+    redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI", "http://127.0.0.1:8888/callback"),
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
     client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
     cache_path=os.path.join(BASE_DIR, "token_cache.txt")
@@ -79,6 +82,31 @@ def play_artists_top_song(artist_id):
         print("No active Spotify devices found.")
         return None
 
+def _get_target_device_id():
+    """Prefer the currently active device; fall back to the first available one."""
+    devices = sp.devices().get('devices', [])
+    if not devices:
+        return None
+    active = next((d for d in devices if d.get('is_active')), None)
+    return (active or devices[0])['id']
+
+def _play_uris_on_device(uris):
+    """Transfer playback to a target device and start the given URIs.
+
+    Spotify's transfer_playback is asynchronous, so calling start_playback
+    immediately after it is a known race condition: the device may still be
+    mid-transfer and silently ignore the new URIs, leaving the previous
+    track playing. A short delay avoids that.
+    """
+    device_id = _get_target_device_id()
+    if not device_id:
+        return {"status": "error", "message": "No active Spotify devices found"}
+
+    sp.transfer_playback(device_id, force_play=True)
+    time.sleep(0.8)
+    sp.start_playback(device_id=device_id, uris=uris)
+    return {"status": "playing"}
+
 def play_song_by_artist(artist_name):
     artist_id = spotify_search(artist_name)
     if not artist_id:
@@ -89,15 +117,10 @@ def play_song_by_artist(artist_name):
         return {"status": "error", "message": "No top tracks found"}
 
     track = top_tracks['tracks'][0]
-    track_uri = track['uri']
 
-    devices = sp.devices()
-    if not devices['devices']:
-        return {"status": "error", "message": "No active Spotify devices found"}
-
-    device_id = devices['devices'][0]['id']
-    sp.transfer_playback(device_id, force_play=True)
-    sp.start_playback(device_id=device_id, uris=[track_uri])
+    result = _play_uris_on_device([track['uri']])
+    if result["status"] != "playing":
+        return result
 
     save_album_art(track['album']['images'][0]['url'])
 
@@ -108,22 +131,20 @@ def play_song_by_artist(artist_name):
     }
 
 def play_song_by_name(song_name):
-    search_result = sp.search(q=song_name, type='track', limit=1)
+    # Spotify's search endpoint has a known caching bug where limit=1 can
+    # return an unrelated cached result regardless of the query. Requesting
+    # more results and taking the first one avoids it.
+    search_result = sp.search(q=song_name, type='track', limit=3)
     tracks = search_result.get('tracks', {}).get('items', [])
 
     if not tracks:
         return {"status": "error", "message": "Song not found"}
 
     track = tracks[0]
-    track_uri = track['uri']
 
-    devices = sp.devices()
-    if not devices['devices']:
-        return {"status": "error", "message": "No active Spotify devices found"}
-
-    device_id = devices['devices'][0]['id']
-    sp.transfer_playback(device_id, force_play=True)
-    sp.start_playback(device_id=device_id, uris=[track_uri])
+    result = _play_uris_on_device([track['uri']])
+    if result["status"] != "playing":
+        return result
 
     save_album_art(track['album']['images'][0]['url'])
 
@@ -138,15 +159,11 @@ def play_song_by_uri(uris):
     logger = logging.getLogger(__name__)
     logger.info(f"Playing song with URI: {uris}")
 
-    devices = sp.devices()
-    if not devices['devices']:
-        return {"status": "error", "message": "No active Spotify devices found"}
+    result = _play_uris_on_device(uris)
+    if result["status"] != "playing":
+        return result
 
-    device_id = devices['devices'][0]['id']
-    sp.transfer_playback(device_id, force_play=True)
-    sp.start_playback(device_id=device_id, uris=uris)
-
-    # ✅ Wait briefly to let Spotify update playback state
+    # Wait briefly to let Spotify update playback state
     time.sleep(1.5)  # 1.5 seconds is usually enough
 
     playback = sp.current_playback()
@@ -197,7 +214,7 @@ def find_playlist_id(query="classic rock"):
     Searches Spotify for a playlist matching the query and returns its ID.
     """
     try:
-        results = public_sp.search(q=query, type="playlist", limit=1)
+        results = public_sp.search(q=query, type="playlist", limit=3)
         print("Raw playlist search result:", results)  # 👈 Debug print
 
         playlists = results.get('playlists')

@@ -4,12 +4,27 @@
   <meta charset="UTF-8" />
   <title>Mystery Artist - Bass Doodle</title>
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
-  <h1>Mystery Artist</h1>
-  <button onclick="goToMainMenu()">Back to Main Menu</button>
-  <p>Content for Mystery Artist will go here.</p>
-  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+<body class="quiz-body">
+  <div class="background-overlay"></div>
+
+  <header class="quiz-header">
+    <button class="nav-btn btn-accent" onclick="goToMainMenu()"><i class="fas fa-arrow-left"></i> Main Menu</button>
+    <h1>Mystery Artist</h1>
+    <div class="nav-spacer"></div>
+  </header>
+
+  <section class="panel coming-soon-panel">
+    <i class="fas fa-user-secret"></i>
+    <p>Mystery Artist is still being built. Check back soon.</p>
+  </section>
+
+  <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>

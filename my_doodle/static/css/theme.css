@@ -1,0 +1,100 @@
+:root {
+  --color-bg: #0d0b12;
+  --color-accent-rgb: 216, 204, 226;
+  --color-accent: #d6c9f0;
+  --color-text: #f0eaf5;
+  --color-text-muted: rgba(240, 234, 245, 0.6);
+  --color-panel-bg: rgba(20, 16, 26, 0.72);
+  --color-panel-border: rgba(216, 204, 226, 0.15);
+  --color-input-bg: rgba(255, 255, 255, 0.08);
+  --color-input-bg-focus: rgba(255, 255, 255, 0.14);
+
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Quicksand', sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 6px 16px rgba(0, 0, 0, 0.3);
+
+  --transition-fast: 0.2s ease;
+  --transition-med: 0.3s ease;
+}
+
+/* Shared button treatment used across every page */
+.btn-accent {
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--color-accent-rgb), 0.85);
+  color: #1a1a1a;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-med), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-accent:hover {
+  background: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn-accent:active {
+  transform: translateY(0);
+}
+
+/* Reusable translucent glass panel */
+.panel {
+  background: var(--color-panel-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-panel-border);
+}
+
+/* Toast notifications, replacing native alert() popups */
+#toastContainer {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 240px;
+  max-width: 340px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-panel-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-panel-border);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity var(--transition-med), transform var(--transition-med);
+}
+
+.toast.toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.toast-error {
+  border-left: 3px solid #e08a8a;
+}
+
+.toast.toast-info {
+  border-left: 3px solid rgba(var(--color-accent-rgb), 0.9);
+}

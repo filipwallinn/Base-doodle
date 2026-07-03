@@ -4,66 +4,39 @@
   <meta charset="UTF-8" />
   <title>Bass Doodle - Home</title>
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
+<body class="home-body">
   <div class="background-overlay"></div>
 
   <div class="main-menu-container">
     <div class="menu-title">
-      <h1>Welcome to Bass Doodle</h1>
+      <h1>Bass Doodle</h1>
       <h2>Select a Game Mode</h2>
     </div>
 
     <div id="gameModeMenu">
-        <button onclick="selectMode('classicQuiz')">Classic Music Quiz</button>
-        <button onclick="selectMode('profileShuffle')">Profile Shuffle</button>
-        <button onclick="selectMode('musicTrivia')">Music Trivia</button>
-        <button onclick="selectMode('finishTheLyric')">Finish the Lyric</button>
-        <button onclick="selectMode('albumArtChallenge')">Album Art Challenge</button>
-        <button onclick="selectMode('mysteryArtist')">Mystery Artist</button>
+        <button onclick="selectMode('classicQuiz')"><i class="fas fa-magnifying-glass"></i> Classic Music Quiz</button>
+        <button onclick="selectMode('profileShuffle')"><i class="fas fa-shuffle"></i> Profile Shuffle</button>
+        <button onclick="selectMode('musicTrivia')"><i class="fas fa-circle-question"></i> Music Trivia</button>
+        <button onclick="selectMode('finishTheLyric')"><i class="fas fa-quote-right"></i> Finish the Lyric</button>
+        <button onclick="selectMode('albumArtChallenge')"><i class="fas fa-image"></i> Album Art Challenge</button>
+        <button onclick="selectMode('mysteryArtist')"><i class="fas fa-user-secret"></i> Mystery Artist</button>
     </div>
   </div>
-<div id="album-scroll-container">
-  <div id="album-scroll-left" class="album-scroll-column">
-    <div class="album-scroll-inner" id="album-scroll-left-inner"></div>
+  <div id="album-scroll-container">
+    <div id="album-scroll-left" class="album-scroll-column">
+      <div class="album-scroll-inner" id="album-scroll-left-inner"></div>
+    </div>
+    <div id="album-scroll-right" class="album-scroll-column">
+      <div class="album-scroll-inner" id="album-scroll-right-inner"></div>
+    </div>
   </div>
-  <div id="album-scroll-right" class="album-scroll-column">
-    <div class="album-scroll-inner" id="album-scroll-right-inner"></div>
-  </div>
-</div>
-    <!-- Script to handle game mode selection-->
-  <script>
-    function selectMode(mode) {
-      localStorage.setItem('selectedMode', mode);
-      switch (mode) {
-        case 'classicQuiz':
-          window.location.href = '/classic-quiz';
-          break;
-        case 'profileShuffle':
-          window.location.href = '/profile-shuffle';
-          break;
-        case 'musicTrivia':
-          window.location.href = '/music-trivia';
-          break;
-        case 'finishTheLyric':
-          window.location.href = '/finish-the-lyric';
-          break;
-        case 'albumArtChallenge':
-          window.location.href = '/album-art-challenge';
-          break;
-        case 'mysteryArtist':
-          window.location.href = '/mystery-artist';
-          break;
-        default:
-          console.warn("Unknown game mode:", mode);
-      }
-    }
-  </script>
   <script src="{{ url_for('static', filename='js/main_menu.js') }}"></script>
 </body>
 </html>

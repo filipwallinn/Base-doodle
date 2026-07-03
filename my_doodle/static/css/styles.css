@@ -1,19 +1,124 @@
-body { 
-    font-family: sans-serif; 
-    text-align: center; 
-    background-color: #121212; 
-    color: #fff;
-} 
+body.quiz-body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-image: url('/static/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  text-align: center;
+  overflow-x: hidden;
+  padding-bottom: 140px;
+  box-sizing: border-box;
+}
 
-#albumArtContainer { 
-    margin-top: 20px; 
-} 
+.quiz-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px;
+  gap: 20px;
+}
+
+.quiz-header h1 {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  color: var(--color-accent);
+  margin: 0;
+  flex: 1;
+}
+
+.nav-spacer {
+  width: 140px;
+}
+
+.nav-btn {
+  white-space: nowrap;
+}
+
+.quiz-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 300px minmax(320px, 640px) 300px;
+  justify-content: center;
+  gap: 28px;
+  padding: 10px 40px 40px;
+}
+
+/* Search panel */
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 70vh;
+}
+
+.search-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.search-bar input {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-bar button {
+  padding: 0 16px;
+}
+
+#searchResults {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  text-align: left;
+  border-radius: var(--radius-md);
+}
+
+#searchResults li {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition: background var(--transition-fast);
+}
+
+#searchResults li:hover {
+  background: rgba(var(--color-accent-rgb), 0.18);
+}
+
+/* Now playing panel */
+.now-playing-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+#albumArtContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 480px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  background: rgba(20, 16, 26, 0.4);
+}
 
 #albumArt {
-  max-width: 40%;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 10%;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
@@ -22,106 +127,135 @@ body {
   opacity: 1;
 }
 
-#rightSideControls {
+.spinner {
   position: absolute;
-  top: 150px;
-  right: 20%;
-  transform: translateX(50%);
-  width: 300px;
-  background: rgba(24, 24, 24, 0.95);
-  backdrop-filter: blur(6px);
-  padding: 25px;
-  z-index: 100;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.spinner.spinner-visible {
+  opacity: 1;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#nowPlayingInfo {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  border-radius: 16px;
+  gap: 2px;
 }
 
-#rightSideControls input[type="text"] {
-  padding: 12px;
+#nowPlayingTrack {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+#nowPlayingArtist {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+#hintText {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  max-width: 420px;
+  min-height: 1.2em;
+}
+
+.hint-btn {
+  padding: 12px 26px;
+}
+
+/* Controls panel */
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.control-group label {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  letter-spacing: 0.02em;
+}
+
+input[type="text"] {
+  padding: 12px 14px;
   border: none;
-  border-radius: 8px;
-  background-color: #1f1f1f;
-  color: #e0e0e0;
-  font-size: 14px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-input-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   outline: none;
-  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: box-shadow var(--transition-med), background-color var(--transition-med);
 }
 
-#rightSideControls input[type="text"]:focus {
-  background-color: #2a2a2a;
-  box-shadow: 0 0 8px #f0a5ff;
+input[type="text"]::placeholder {
+  color: var(--color-text-muted);
 }
 
-#rightSideControls button {
+input[type="text"]:focus {
+  background-color: var(--color-input-bg-focus);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.5);
+}
+
+.controls-panel button {
   padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f0a5ff, #f0a5ff);
-  color: #000000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-#rightSideControls button:hover {
-  background: linear-gradient(135deg, #0097a7, #00bcd4);
-  transform: scale(1.05);
+.surprise-btn {
+  margin-top: auto;
 }
 
-#searchResults {
-  position: fixed;
-  top: 0;
-  left: 0;
-  max-width: 29%;
-  height: 100vh;
-  margin: 0;
-  padding: 5px 0;
-  background: #181818;
-  border-right: 2px solid #333;
-  overflow-y: auto;
-  list-style: none;
-  z-index: 101;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
-  font-family: 'Segoe UI', sans-serif;
-  color: #e0e0e0;
-}
-
-#searchResults li {
-  padding: 16px 28px;
-  border-bottom: 1px solid #232323;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-#searchResults li:hover {
-  background: #282828;
-}
-
-
+/* Playback control */
 #bottomControls {
   position: fixed;
-  bottom: 20px;
+  bottom: 24px;
   left: 0;
   width: 100%;
   text-align: center;
-  z-index: 100;
+  z-index: 10;
 }
 
 #playPauseButton {
-  background: linear-gradient(145deg, #4b5e4b, #2f3a2f);
+  background: linear-gradient(145deg, #4b3e5e, #2a2233);
   border: none;
   border-radius: 50%;
-  padding: 35px;
-  font-size: 45px;
-  color: #e0e0e0;
+  width: 90px;
+  height: 90px;
+  padding: 0;
+  font-size: 32px;
+  color: var(--color-text);
   cursor: pointer;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-  transition: background 0.3s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  transition: transform var(--transition-fast);
   perspective: 600px;
+}
+
+#playPauseButton:hover {
+  transform: scale(1.06);
 }
 
 .flip-container {
@@ -165,7 +299,7 @@ body {
 #spheal {
   position: fixed;
   bottom: 0;
-  right: -320px; /* start off-screen on the right */
+  right: -320px;
   width: 300px;
   z-index: 999;
   animation: rollSphealLeft 5s linear forwards;
@@ -178,6 +312,47 @@ body {
   }
   100% {
     right: 100vw;
-    transform: rotate(-1080deg); /* reverse spin for realism */
+    transform: rotate(-1080deg);
+  }
+}
+
+/* Shared "coming soon" layout for game modes not built yet */
+.coming-soon-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  margin: 60px auto 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.coming-soon-panel i {
+  font-size: 2.2rem;
+  color: var(--color-accent);
+}
+
+.coming-soon-panel p {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .quiz-layout {
+    grid-template-columns: 1fr;
+    padding: 10px 20px 40px;
+  }
+
+  .quiz-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-spacer {
+    display: none;
   }
 }

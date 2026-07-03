@@ -1,27 +1,51 @@
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 from spotipy_logic import *
 from flask_cors import CORS
+from spotipy.exceptions import SpotifyException
+from spotipy.oauth2 import SpotifyOauthError
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 import sys
 
-# Create logs directory if it doesn't exist
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
-# Redirect stdout and stderr to log files
-sys.stdout = open("logs/stdout.log", "a")
-sys.stderr = open("logs/stderr.log", "a")
+# Create logs directory if it doesn't exist
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # Set up logging
-log_handler = RotatingFileHandler("logs/app.log", maxBytes=1000000, backupCount=3)
+log_handler = RotatingFileHandler(os.path.join(LOGS_DIR, "app.log"), maxBytes=1000000, backupCount=3)
 log_handler.setLevel(logging.INFO)
 app.logger.addHandler(log_handler)
+
+@app.errorhandler(SpotifyOauthError)
+def handle_oauth_error(e):
+    app.logger.error(f"Spotify OAuth error: {e}")
+    return jsonify({
+        "status": "error",
+        "message": "Couldn't connect to Spotify. Open this app in your browser and log in "
+                    "when Spotify's authorization page appears, then try again."
+    })
+
+@app.errorhandler(SpotifyException)
+def handle_spotify_error(e):
+    app.logger.error(f"Spotify API error: {e}")
+    reason = (e.reason or "").upper()
+    msg_lower = (e.msg or "").lower()
+
+    if "PREMIUM" in reason or "premium" in msg_lower:
+        message = "This action requires Spotify Premium."
+    elif e.http_status == 404 or "NO_ACTIVE_DEVICE" in reason:
+        message = "No active Spotify device found. Open Spotify on a device first."
+    else:
+        message = f"Spotify error: {e.msg} ({e.reason})"
+    return jsonify({"status": "error", "message": message})
 
 # Routes for HTML pages
 @app.route("/")
@@ -107,7 +131,14 @@ def hint():
 @app.route("/playback-status")
 def playback_status():
     playback = sp.current_playback()
-    return jsonify({"isPlaying": bool(playback and playback['is_playing'])})
+    if not playback or not playback.get("item"):
+        return jsonify({"isPlaying": False, "track": None, "artist": None})
+
+    return jsonify({
+        "isPlaying": bool(playback["is_playing"]),
+        "track": playback["item"]["name"],
+        "artist": playback["item"]["artists"][0]["name"]
+    })
 
 @app.route("/search", methods=["POST"])
 def search():
